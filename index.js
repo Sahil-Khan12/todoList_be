@@ -1,5 +1,6 @@
 import express from "express";
 import taskRoutes from "./routes/todo.js";
+import cors from "cors";
 import connectDB from "./config/dbConnection.js";
 
 await connectDB();
