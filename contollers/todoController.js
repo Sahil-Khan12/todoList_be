@@ -2,10 +2,9 @@ import Task from "../models/model.js";
 
 export const addTask = async (req, res) => {
     try {
-        const { title, description, status, priority } = req.body;
+        const { title, status, priority } = req.body;
         const task = new Task({
             title,
-            description,
             status,
             priority
         });
@@ -20,27 +19,22 @@ export const addTask = async (req, res) => {
 
 export const fetchTask = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1; 
-        const limit = parseInt(req.query.limit) || 10; 
+        const { id } = req.query; // Destructure the `id` from query parameters
+        if (id) {
+            const task = await Task.findById(id); // Singular `task` since it’s one item
+            if (!task) {
+                return res.status(404).json({ error: "Task not found" });
+            }
+            return res.status(200).json({ task });
+        }
 
-        const skip = (page - 1) * limit;
-
-        const tasks = await Task.find().skip(skip).limit(limit);
-
-        const totalCount = await Task.countDocuments();
-        const totalPages = Math.ceil(totalCount / limit);
-
-        res.status(200).json({
-            currentPage: page,
-            totalPages,
-            totalTasks: totalCount,
-            tasksPerPage: limit,
-            tasks,
-        });
+        const tasks = await Task.find(); // Fetch all tasks if `id` is not provided
+        res.status(200).json({ tasks });
     } catch (error) {
         res.status(500).json({ error: "Failed to fetch tasks", details: error.message });
     }
 };
+
 
 
 export const updateTask = async (req, res) => {
